@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Throwback Mix">
+  <defs>
+    <linearGradient id="bgm5" gradientTransform="rotate(81 0.5 0.5)">
+      <stop offset="0" stop-color="#f59e0b"/>
+      <stop offset="0.55" stop-color="#78350f"/>
+      <stop offset="1" stop-color="#ef4444"/>
+    </linearGradient>
+    <radialGradient id="glowm5" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.5"/>
+      <stop offset="0.7" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bgm5)"/>
+  <circle cx="392" cy="104" r="230" fill="url(#glowm5)"/>
+  <g>
+    <ellipse cx="150" cy="140" rx="185" ry="150" fill="#ffffff" opacity="0.12"/>
+    <ellipse cx="392" cy="352" rx="170" ry="145" fill="#78350fd9"/>
+    <ellipse cx="392" cy="352" rx="80" ry="70" fill="#ffffff" opacity="0.14"/>
+    <circle cx="352" cy="140" r="58" fill="#f59e0b99"/>
+    <ellipse cx="120" cy="372" rx="120" ry="86" fill="#000000" opacity="0.14"/>
+  </g>
+  <g><rect x="30.0" y="252.0" width="3.40" height="32" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="36.2" y="233.0" width="3.40" height="51" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="42.4" y="228.0" width="3.40" height="56" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="48.6" y="226.0" width="3.40" height="58" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="54.8" y="270.0" width="3.40" height="14" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="61.0" y="230.0" width="3.40" height="54" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="67.1" y="227.0" width="3.40" height="57" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="73.3" y="271.0" width="3.40" height="13" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="79.5" y="274.0" width="3.40" height="10" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="85.7" y="220.0" width="3.40" height="64" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="91.9" y="260.0" width="3.40" height="24" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="98.1" y="266.0" width="3.40" height="18" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="104.3" y="238.0" width="3.40" height="46" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="110.5" y="248.0" width="3.40" height="36" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="116.7" y="248.0" width="3.40" height="36" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="122.9" y="218.0" width="3.40" height="66" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="129.0" y="250.0" width="3.40" height="34" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="135.2" y="218.0" width="3.40" height="66" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="141.4" y="221.0" width="3.40" height="63" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="147.6" y="234.0" width="3.40" height="50" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="153.8" y="236.0" width="3.40" height="48" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="160.0" y="227.0" width="3.40" height="57" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="166.2" y="255.0" width="3.40" height="29" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="172.4" y="249.0" width="3.40" height="35" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="178.6" y="272.0" width="3.40" height="12" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="184.8" y="237.0" width="3.40" height="47" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="191.0" y="216.0" width="3.40" height="68" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="197.1" y="226.0" width="3.40" height="58" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="203.3" y="242.0" width="3.40" height="42" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="209.5" y="222.0" width="3.40" height="62" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="215.7" y="259.0" width="3.40" height="25" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="221.9" y="247.0" width="3.40" height="37" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="228.1" y="274.0" width="3.40" height="10" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="234.3" y="220.0" width="3.40" height="64" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="240.5" y="236.0" width="3.40" height="48" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="246.7" y="242.0" width="3.40" height="42" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="252.9" y="226.0" width="3.40" height="58" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="259.0" y="272.0" width="3.40" height="12" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="265.2" y="244.0" width="3.40" height="40" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="271.4" y="242.0" width="3.40" height="42" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="277.6" y="226.0" width="3.40" height="58" rx="2.4" fill="#ffffff" opacity="0.22"/><rect x="283.8" y="238.0" width="3.40" height="46" rx="2.4" fill="#ffffff" opacity="0.22"/></g>
+  <rect y="286" width="512" height="226" fill="#000000" opacity="0.24"/>
+  <text x="30" y="352" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="36" font-weight="800" letter-spacing="1" fill="#ffffff">Throwback Mix</text>
+  <text x="30" y="307" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="600" letter-spacing="5" fill="#ffffff" opacity="0.72">WAVEMUSIC</text>
+  <rect x="30" y="376" width="52" height="5" rx="2.5" fill="#ffffff" opacity="0.85"/>
+  <rect x="30" y="452" width="452" height="4" rx="2" fill="#ffffff" opacity="0.16"/>
+</svg>

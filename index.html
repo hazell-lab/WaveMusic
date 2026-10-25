@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WaveMusic - an original dark-themed music streaming interface built with HTML, CSS and vanilla JavaScript. A frontend portfolio project with a full music player, playlists, albums, artist pages, search and a responsive mobile layout.">
+  <meta name="theme-color" content="#08080a">
+  <meta name="color-scheme" content="dark">
+
+  <title>WaveMusic &mdash; Listen Without Limits</title>
+
+  <!-- app icon -->
+  <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
+  <link rel="apple-touch-icon" href="assets/images/app-icon.svg">
+
+  <!-- fonts: the project uses system fonts, so nothing to download.
+       uncomment the two lines below if you want the inter webfont
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+  -->
+
+  <!-- styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- app shell: sidebar, top header, main view and the player -->
+  <div class="app">
+
+    <!-- sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+      <div class="brand">
+        <a class="brand-link" href="#home" data-action="go" data-view="home" aria-label="WaveMusic home">
+          <span class="brand-mark"><i data-icon="wave"></i></span>
+          <span class="brand-text">
+            <span class="brand-name">WaveMusic</span>
+            <span class="brand-tag">Listen freely</span>
+          </span>
+        </a>
+        <button class="icon-btn sidebar-close" type="button" data-action="close-sidebar" aria-label="Close navigation">
+          <i data-icon="close"></i>
+        </button>
+      </div>
+
+      <!-- main links -->
+      <nav class="side-nav">
+        <button class="side-link" type="button" data-nav="home" data-action="go" data-view="home">
+          <i data-icon="home"></i><span>Home</span>
+        </button>
+        <button class="side-link" type="button" data-nav="search" data-action="go" data-view="search">
+          <i data-icon="search"></i><span>Search</span>
+        </button>
+        <button class="side-link" type="button" data-nav="library" data-action="go" data-view="library">
+          <i data-icon="library"></i><span>Library</span>
+        </button>
+        <button class="side-link" type="button" data-nav="liked" data-action="go" data-view="liked">
+          <i data-icon="heart"></i><span>Liked Songs</span>
+          <span class="side-badge" id="liked-count">12</span>
+        </button>
+        <button class="side-link" type="button" data-nav="recent" data-action="go" data-view="recent">
+          <i data-icon="history"></i><span>Recently Played</span>
+        </button>
+      </nav>
+
+      <!-- your playlists: filled in by app.js -->
+      <section class="side-playlists">
+        <h2 class="side-heading">Your Playlists</h2>
+        <div class="side-playlist-list" id="sidebar-playlists"></div>
+      </section>
+
+      <p class="sidebar-foot">
+        Demo project &middot; all artists, albums and songs are fictional.
+      </p>
+    </aside>
+
+    <!-- backdrop behind the mobile drawer -->
+    <div class="sidebar-backdrop" data-action="close-sidebar" aria-hidden="true"></div>
+
+    <!-- main column -->
+    <div class="main" id="main">
+
+      <!-- top header -->
+      <header class="topbar">
+        <button class="icon-btn menu-btn" type="button" data-action="toggle-sidebar" aria-label="Open navigation">
+          <i data-icon="menu"></i>
+        </button>
+
+        <div class="nav-group">
+          <button class="icon-btn" type="button" id="back-btn" data-action="back" aria-label="Go back" title="Go back" disabled>
+            <i data-icon="chevronLeft"></i>
+          </button>
+          <button class="icon-btn" type="button" id="forward-btn" data-action="forward" aria-label="Go forward" title="Go forward" disabled>
+            <i data-icon="chevronRight"></i>
+          </button>
+        </div>
+
+        <!-- clicking anywhere here opens the search page -->
+        <div class="search-field" data-action="go" data-view="search" role="search">
+          <i data-icon="search"></i>
+          <input id="top-search" type="search" placeholder="Search songs, artists, albums..."
+                 autocomplete="off" aria-label="Search songs, artists, albums">
+        </div>
+
+        <div class="topbar-spacer"></div>
+
+        <button class="icon-btn" type="button" data-action="toast" data-message="You have no new notifications" aria-label="Notifications">
+          <i data-icon="bell"></i>
+        </button>
+
+        <!-- profile menu -->
+        <div class="profile">
+          <button class="profile-btn" type="button" id="profile-btn" data-action="open-profile"
+                  aria-haspopup="true" aria-expanded="false" aria-controls="profile-menu">
+            <img class="avatar" id="user-avatar" src="assets/images/avatar.svg" alt="Profile picture"
+                 onerror="onCoverError(this,'Alex Rivera')">
+            <span class="profile-name" id="user-name">Alex Rivera</span>
+            <span class="profile-caret"><i data-icon="chevronDown"></i></span>
+          </button>
+
+          <div class="dropdown is-hidden" id="profile-menu" role="menu" aria-hidden="true">
+            <div class="dropdown-head">
+              <img class="avatar" src="assets/images/avatar.svg" alt="" onerror="onCoverError(this,'Alex Rivera')">
+              <div>
+                <strong>Alex Rivera</strong>
+                <small>@alexrivera &middot; Free plan (demo)</small>
+              </div>
+            </div>
+            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
+                    data-icon="user" data-message="Profile page is not part of this demo">
+              <i data-icon="user"></i><span>Profile</span>
+            </button>
+            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
+                    data-icon="settings" data-message="Settings panel is not part of this demo">
+              <i data-icon="settings"></i><span>Settings</span>
+            </button>
+            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
+                    data-icon="plus" data-message="Upgrade flow is not part of this demo">
+              <i data-icon="plus"></i><span>Upgrade plan</span>
+            </button>
+            <div class="dropdown-sep"></div>
+            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
+                    data-icon="logout" data-message="Logged out (frontend demo only)">
+              <i data-icon="logout"></i><span>Log out</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- pages are rendered in here by app.js -->
+      <main class="view" id="view" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <!-- queue panel -->
+  <aside class="queue-panel" id="queue-panel" aria-label="Playback queue" aria-hidden="true">
+    <div class="queue-head">
+      <h2>Queue</h2>
+      <button class="icon-btn" type="button" data-action="toggle-queue" aria-label="Close queue">
+        <i data-icon="close"></i>
+      </button>
+    </div>
+    <p class="queue-source" id="queue-source">Playing from: WaveMusic</p>
+    <div class="queue-list" id="queue-list"></div>
+  </aside>
+
+  <!-- music player -->
+  <footer class="player" id="player" aria-label="Music player">
+
+    <!-- current song -->
+    <div class="player-left">
+      <button class="player-cover-btn" type="button" id="player-cover-btn"
+              data-action="open-now-playing" title="Open the full player">
+        <img class="player-cover" id="player-cover" src="assets/images/default-cover.svg" alt="Album artwork"
+             onerror="onCoverError(this,'WaveMusic')">
+      </button>
+      <div class="player-meta">
+        <button class="player-title" id="player-title" type="button" data-action="open-now-playing">Nothing playing yet</button>
+        <span class="player-artist" id="player-artist">Pick a song to begin</span>
+        <span class="demo-badge" id="demo-badge"><i data-icon="headphones"></i> Demo</span>
+      </div>
+      <span id="player-like"></span>
+    </div>
+
+    <!-- playback controls -->
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="ctrl-btn" type="button" id="shuffle-btn" data-action="shuffle" title="Shuffle" aria-label="Shuffle">
+          <i data-icon="shuffle"></i>
+        </button>
+        <button class="ctrl-btn" type="button" data-action="prev" title="Previous" aria-label="Previous track">
+          <i data-icon="skipBack"></i>
+        </button>
+        <button class="play-btn" type="button" data-action="toggle-play" id="player-play" title="Play" aria-label="Play">
+          <span id="player-play-icon"><i data-icon="play"></i></span>
+        </button>
+        <button class="ctrl-btn" type="button" data-action="next" title="Next" aria-label="Next track">
+          <i data-icon="skipForward"></i>
+        </button>
+        <button class="ctrl-btn" type="button" id="repeat-btn" data-action="repeat" title="Repeat off" aria-label="Repeat">
+          <i data-icon="repeat"></i>
+        </button>
+      </div>
+
+      <div class="player-progress-row">
+        <span class="time" id="player-current">0:00</span>
+        <div class="progress" id="player-progress" role="slider" tabindex="0"
+             aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-track">
+            <div class="progress-fill" id="player-progress-fill"></div>
+            <div class="progress-knob" id="player-progress-knob"></div>
+          </div>
+        </div>
+        <span class="time" id="player-duration">0:00</span>
+      </div>
+    </div>
+
+    <!-- queue, devices and volume -->
+    <div class="player-right">
+      <button class="icon-btn" type="button" id="queue-btn" data-action="toggle-queue" title="Queue" aria-label="Show queue">
+        <i data-icon="queue"></i>
+      </button>
+      <button class="icon-btn device-btn" type="button" data-action="toast"
+              data-message="No other devices found (demo)" title="Connect to a device" aria-label="Connect to a device">
+        <i data-icon="devices"></i>
+      </button>
+      <button class="icon-btn" type="button" id="volume-btn" data-action="toggle-mute" title="Mute" aria-label="Mute">
+        <i data-icon="volume"></i>
+      </button>
+      <div class="volume-wrap">
+        <input class="volume-slider" id="volume-slider" type="range" min="0" max="100" value="80"
+               aria-label="Volume" style="--volume: 80%">
+      </div>
+    </div>
+  </footer>
+
+  <!-- now playing overlay -->
+  <div class="now-playing" id="now-playing" role="dialog" aria-modal="true" aria-label="Now playing" aria-hidden="true">
+    <div class="np-inner">
+      <button class="icon-btn np-close" type="button" data-action="close-now-playing" aria-label="Close full player">
+        <i data-icon="chevronDown"></i>
+      </button>
+
+      <div class="np-grid">
+        <figure class="art np-art" id="np-art">
+          <img class="art-img" id="np-cover" src="assets/images/default-cover.svg" alt="Album artwork"
+               onerror="onCoverError(this,'WaveMusic')">
+          <span class="art-sheen" aria-hidden="true"></span>
+        </figure>
+
+        <div class="np-right">
+          <p class="np-kicker">Now playing</p>
+          <h2 class="np-title" id="np-title">Nothing playing yet</h2>
+          <p class="np-artist" id="np-artist">Choose a song from the library</p>
+          <p class="np-album" id="np-album">&mdash;</p>
+
+          <div class="np-progress-row">
+            <span class="time" id="np-current">0:00</span>
+            <div class="progress" id="np-progress" role="slider" tabindex="0"
+                 aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="progress-track">
+                <div class="progress-fill" id="np-progress-fill"></div>
+                <div class="progress-knob" id="np-progress-knob"></div>
+              </div>
+            </div>
+            <span class="time" id="np-duration">0:00</span>
+          </div>
+
+          <div class="np-controls">
+            <button class="ctrl-btn" type="button" id="np-shuffle" data-action="shuffle" title="Shuffle" aria-label="Shuffle">
+              <i data-icon="shuffle"></i>
+            </button>
+            <button class="ctrl-btn" type="button" data-action="prev" title="Previous" aria-label="Previous track">
+              <i data-icon="skipBack"></i>
+            </button>
+            <button class="play-btn" type="button" data-action="toggle-play" title="Play" aria-label="Play">
+              <span id="np-play-icon"><i data-icon="play"></i></span>
+            </button>
+            <button class="ctrl-btn" type="button" data-action="next" title="Next" aria-label="Next track">
+              <i data-icon="skipForward"></i>
+            </button>
+            <button class="ctrl-btn" type="button" id="np-repeat" data-action="repeat" title="Repeat off" aria-label="Repeat">
+              <i data-icon="repeat"></i>
+            </button>
+          </div>
+
+          <div class="np-foot">
+            <span id="np-like"></span>
+            <span>Keyboard: <strong>Space</strong> play/pause &middot; <strong>/</strong> search &middot;
+              <strong>Shift + &rarr;</strong> next</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- mobile navigation -->
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <div class="mobile-nav-inner">
+      <a class="mobile-link" href="#home" data-nav-mobile="home" data-action="go" data-view="home">
+        <i data-icon="home"></i><span>Home</span>
+      </a>
+      <a class="mobile-link" href="#search" data-nav-mobile="search" data-action="go" data-view="search">
+        <i data-icon="search"></i><span>Search</span>
+      </a>
+      <a class="mobile-link" href="#library" data-nav-mobile="library" data-action="go" data-view="library">
+        <i data-icon="library"></i><span>Library</span>
+      </a>
+      <a class="mobile-link" href="#liked" data-nav-mobile="liked" data-action="go" data-view="liked">
+        <i data-icon="heart"></i><span>Liked</span>
+      </a>
+      <a class="mobile-link" href="#recent" data-nav-mobile="recent" data-action="go" data-view="recent">
+        <i data-icon="history"></i><span>Recent</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- toast message -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- the audio element that plays the songs -->
+  <audio id="audio" preload="metadata"></audio>
+
+  <!-- scripts: helpers first, then the data, then the app -->
+  <script src="js/icons.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
