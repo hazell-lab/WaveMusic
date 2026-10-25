@@ -1,4 +1,4 @@
-# WaveMusic 🎧
+# WaveMusic
 
 A **complete music streaming frontend** built with plain **HTML5, CSS3 and vanilla JavaScript** — no React, no Vue, no Bootstrap, no Tailwind, no build step, no npm install.
 
@@ -86,7 +86,7 @@ wavemusic/
 │   │   ├── chill-vibes/cover.svg
 │   │   └── ... (15 playlists/mixes)
 │   │
-│   └── audio/                  # 👈 PUT YOUR MP3 FILES HERE  (empty on purpose)
+│   └── audio/                  # MP3 Files
 │       └── README.txt
 │
 └── docs/                       # Optional tools — the website does not need these
