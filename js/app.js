@@ -1499,6 +1499,7 @@ function handleAction(action, el, event) {
       break;
     }
     case "go":
+      if (event && el.tagName === "A") event.preventDefault(); // stay in the app instead of reloading
       navigate(el.dataset.view || "home");
       break;
     case "back":
