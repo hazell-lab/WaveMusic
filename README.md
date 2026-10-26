@@ -1,10 +1,14 @@
-# WaveMusic 🎧
+# WaveMusic
 
 A **complete music streaming frontend** built with plain **HTML5, CSS3 and vanilla JavaScript** — no React, no Vue, no Bootstrap, no Tailwind, no build step, no npm install.
 
 It is an **original design** inspired by the *feel* of modern music apps (dark theme, rounded cards, fixed bottom player, soft gradients) but it copies **no** branding, logos, layouts or assets. Every artist, album, song, playlist and piece of artwork in this project is **fictional and generated for this repo**.
 
 Open `index.html` in a browser (or use VS Code Live Server) and you get a working music app: home feed, search, library, playlists, albums, artist pages, a queue, a Now Playing overlay and a fully working bottom player — including a **demo mode** that keeps everything interactive even before you add a single mp3 file.
+
+**[🔗 Live Demo](https://hazell-lab.github.io/WaveMusic/)** · [Source code](https://github.com/hazell-lab/WaveMusic) · [Portfolio](https://hazimaqil-portfolio.netlify.app)
+
+![WaveMusic home page](docs/screenshot.png)
 
 ---
 
@@ -45,7 +49,7 @@ Open `index.html` in a browser (or use VS Code Live Server) and you get a workin
 ## 2. Folder structure
 
 ```
-wavemusic/
+WaveMusic/
 ├── index.html                  # The whole app shell (sidebar, header, player, overlays)
 ├── README.md                   # This file
 │
@@ -86,7 +90,7 @@ wavemusic/
 │   │   ├── chill-vibes/cover.svg
 │   │   └── ... (15 playlists/mixes)
 │   │
-│   └── audio/                  # 👈 PUT YOUR MP3 FILES HERE  (empty on purpose)
+│   └── audio/                  # MP3 Files
 │       └── README.txt
 │
 └── docs/                       # Optional tools — the website does not need these
@@ -547,7 +551,7 @@ Ideas if you want to keep extending this project:
 - [ ] **Service worker** for offline caching (making it a PWA).
 - [ ] **Light theme** toggle by swapping the `:root` variables.
 - [ ] **Vitest / Playwright** test suite built on top of `docs/verify-logic.js`.
-- [ ] **Deploy** to GitHub Pages or Netlify (nothing to configure — it is static).
+- [x] **Deploy** — live on [GitHub Pages](https://hazell-lab.github.io/WaveMusic/).
 
 ---
 
@@ -558,3 +562,13 @@ Ideas if you want to keep extending this project:
 - Fonts: the system font stack by default; Inter is an optional Google Font.
 
 **Licence:** free to use as a learning resource and in your portfolio. Please do not re-publish it as a paid template, and do not add copyrighted music or artwork to it.
+
+---
+
+## Author
+
+Built by **Hazim Aqil**, Software Engineering student at the German-Malaysian Institute (GMI).
+
+- Portfolio: [hazimaqil-portfolio.netlify.app](https://hazimaqil-portfolio.netlify.app)
+- GitHub: [@hazell-lab](https://github.com/hazell-lab)
+- LinkedIn: [mdhazimaqil](https://www.linkedin.com/in/mdhazimaqil/)
