@@ -532,7 +532,7 @@ node docs/verify-logic.js
 - The WaveMusic mark, colour palette, icon set and all 58 covers are original, generated in this repository by `docs/build-art.js`.
 - The layout is a common, functional music-app pattern (sidebar + content + bottom player). It is not a pixel copy of any product.
 
-If you publish this, replace the placeholder profile (Alex Rivera) and add your own name to the footer/README.
+The profile shown in the app (name, handle and avatar) is set in the `USER` object at the top of `js/app.js` and in the profile menu in `index.html`.
 
 ---
 

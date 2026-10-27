@@ -28,8 +28,8 @@ const STORAGE_KEY = "wavemusic.state.v1";
 
 // change these to use your own name and avatar
 const USER = {
-  name: "Alex Rivera",
-  handle: "@alexrivera",
+  name: "Hazim Aqil",
+  handle: "@hazell-lab",
   avatar: "assets/images/avatar.svg"
 };
 
