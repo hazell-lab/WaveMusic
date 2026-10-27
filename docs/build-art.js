@@ -354,7 +354,7 @@ function makeJobs() {
   });
 
   // profile avatar, app icon and the fallback cover
-  jobs.push({ dir: OUT_DIRS.image, file: "avatar.svg", key: "profile", text: "ALEX RIVERA", uid: "u1" });
+  jobs.push({ dir: OUT_DIRS.image, file: "avatar.svg", key: "profile", text: "HAZIM AQIL", uid: "u1" });
   jobs.push({ dir: OUT_DIRS.image, file: "default-cover.svg", key: "waves", text: "WAVEMUSIC", uid: "u2" });
   jobs.push({ dir: OUT_DIRS.image, file: "app-icon.svg", key: "brand", text: "WAVE", uid: "u3" });
 
