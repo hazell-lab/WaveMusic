@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="WaveMusic - an original dark-themed music streaming interface built with HTML, CSS and vanilla JavaScript. A frontend portfolio project with a full music player, playlists, albums, artist pages, search and a responsive mobile layout.">
+  <meta name="description" content="WaveMusic - a dark-themed music streaming web app built with HTML, CSS and vanilla JavaScript. Plays 30-second previews of popular songs from the iTunes Search API, with playlists, albums, artist pages, search and a responsive mobile layout.">
   <meta name="theme-color" content="#08080a">
   <meta name="color-scheme" content="dark">
 
@@ -73,7 +73,7 @@
       </section>
 
       <p class="sidebar-foot">
-        Demo project &middot; all artists, albums and songs are fictional.
+        Song previews and artwork courtesy of Apple Music.
       </p>
     </aside>
 
@@ -180,7 +180,7 @@
       <div class="player-meta">
         <button class="player-title" id="player-title" type="button" data-action="open-now-playing">Nothing playing yet</button>
         <span class="player-artist" id="player-artist">Pick a song to begin</span>
-        <span class="demo-badge" id="demo-badge"><i data-icon="headphones"></i> Demo</span>
+        <span class="demo-badge is-hidden" id="demo-badge"><i data-icon="headphones"></i> <span class="demo-badge-label">Preview</span></span>
       </div>
       <span id="player-like"></span>
     </div>

@@ -1,6 +1,6 @@
-/* makes the placeholder cover art, so the project never relies on outside images.
-   it reads the palettes from js/data.js and writes one svg per album, artist,
-   playlist, mix and single.
+/* makes the generated cover art for the playlists, mixes, profile avatar,
+   app icon and fallback cover. album and artist artwork comes from apple music.
+   it reads the palettes from js/data.js.
 
    run it with:  node docs/build-art.js */
 
@@ -12,8 +12,6 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..");
 const DATA_FILE = path.join(ROOT, "js", "data.js");
 const OUT_DIRS = {
-  album: path.join(ROOT, "assets", "albums"),
-  artist: path.join(ROOT, "assets", "artists"),
   playlist: path.join(ROOT, "assets", "playlists"),
   image: path.join(ROOT, "assets", "images")
 };
@@ -213,85 +211,12 @@ function buildCover(key, text, uid) {
 `;
 }
 
-// a wide artist banner (1600 x 700). no text is baked in, because the artist
-// page already prints the name on top of it.
-function buildHero(key, text, uid) {
-  const palette = PALETTES[key] || ["#7c5cff", "#2a1a6e", "#ff5ca8"];
-  const c1 = palette[0];
-  const c2 = palette[1];
-  const c3 = palette[2] || palette[0];
-
-  const seed = seedOf(key + text);
-  const family = STYLE_NAMES[seed % STYLE_NAMES.length];
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 700" width="1600" height="700" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${text}">
-  <defs>
-    <linearGradient id="bg${uid}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="${c2}"/>
-      <stop offset="0.6" stop-color="${c1}"/>
-      <stop offset="1" stop-color="${c3}"/>
-    </linearGradient>
-    <radialGradient id="glow${uid}" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.45"/>
-      <stop offset="0.7" stop-color="#ffffff" stop-opacity="0.05"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="1600" height="700" fill="url(#bg${uid})"/>
-  <circle cx="1240" cy="150" r="520" fill="url(#glow${uid})"/>
-  <g transform="translate(860 -110) scale(1.55)">${STYLES[family](seed, c1, c2)}</g>
-  <g transform="translate(-40 210) scale(3.3 1.6)" opacity="0.8">${bars(seed)}</g>
-</svg>
-`;
-}
-
 // every svg file we want to make
 function makeJobs() {
   const jobs = [];
 
-  // albums
-  const albums = [
-    { key: "neonSkies", title: "Neon Skies", slug: "neon-skies" },
-    { key: "cityLights", title: "City Lights", slug: "city-lights" },
-    { key: "nightDrive", title: "Night Drive", slug: "night-drive" },
-    { key: "paperMoons", title: "Paper Moons", slug: "paper-moons" },
-    { key: "coastalBlues", title: "Coastal Blues", slug: "coastal-blues" },
-    { key: "slowMotion", title: "Slow Motion", slug: "slow-motion" },
-    { key: "solarFlare", title: "Solar Flare", slug: "solar-flare" },
-    { key: "velvetRoom", title: "Velvet Room", slug: "velvet-room" },
-    { key: "quietHours", title: "Quiet Hours", slug: "quiet-hours" },
-    { key: "staticBloom", title: "Static Bloom", slug: "static-bloom" }
-  ];
-  albums.forEach((a, i) => {
-    jobs.push({
-      dir: path.join(OUT_DIRS.album, a.slug),
-      file: "cover.svg",
-      key: a.key,
-      text: a.title,
-      uid: "a" + i
-    });
-  });
-
-  // artists: a round cover and a wide hero
-  const artists = [
-    ["novaLane", "Nova Lane", "nova-lane"],
-    ["ethanCole", "Ethan Cole", "ethan-cole"],
-    ["lunaGrey", "Luna Grey", "luna-grey"],
-    ["kaiRivers", "Kai Rivers", "kai-rivers"],
-    ["miraSol", "Mira Sol", "mira-sol"],
-    ["thePaperHearts", "The Paper Hearts", "the-paper-hearts"],
-    ["dreVale", "Dre Vale", "dre-vale"],
-    ["arianaWilde", "Ariana Wilde", "ariana-wilde"],
-    ["solReed", "Sol Reed", "sol-reed"],
-    ["ivyMonroe", "Ivy Monroe", "ivy-monroe"],
-    ["noahBennett", "Noah Bennett", "noah-bennett"],
-    ["zaidAmir", "Zaid Amir", "zaid-amir"]
-  ];
-  artists.forEach(([key, name, slug], i) => {
-    const dir = path.join(OUT_DIRS.artist, slug);
-    jobs.push({ dir, file: "cover.svg", key, text: name, uid: "r" + i });
-    jobs.push({ dir, file: "hero.svg", key, text: name, uid: "h" + i, hero: true });
-  });
+  // album and artist artwork comes from apple music, so only playlists,
+  // mixes and the app's own images are drawn here
 
   // playlists
   const playlists = [
@@ -334,25 +259,6 @@ function makeJobs() {
     });
   });
 
-  // singles
-  const singles = [
-    ["afterglow", "Afterglow", "afterglow"],
-    ["glassWaves", "Glass Waves", "glass-waves"],
-    ["honeyStatic", "Honey Static", "honey-static"],
-    ["northbound", "Northbound", "northbound"],
-    ["paperPlanes", "Paper Planes", "paper-planes"],
-    ["wildflower", "Wildflower", "wildflower"]
-  ];
-  singles.forEach(([key, name, slug], i) => {
-    jobs.push({
-      dir: path.join(OUT_DIRS.album, slug),
-      file: "cover.svg",
-      key,
-      text: name,
-      uid: "s" + i
-    });
-  });
-
   // profile avatar, app icon and the fallback cover
   jobs.push({ dir: OUT_DIRS.image, file: "avatar.svg", key: "profile", text: "HAZIM AQIL", uid: "u1" });
   jobs.push({ dir: OUT_DIRS.image, file: "default-cover.svg", key: "waves", text: "WAVEMUSIC", uid: "u2" });
@@ -368,7 +274,7 @@ function run() {
 
   jobs.forEach((job) => {
     fs.mkdirSync(job.dir, { recursive: true });
-    const svg = job.hero ? buildHero(job.key, job.text, job.uid) : buildCover(job.key, job.text, job.uid);
+    const svg = buildCover(job.key, job.text, job.uid);
     fs.writeFileSync(path.join(job.dir, job.file), svg, "utf8");
     written++;
   });
@@ -376,7 +282,7 @@ function run() {
   console.log("WaveMusic artwork generated");
   console.log("  palettes found in js/data.js : " + Object.keys(PALETTES).length);
   console.log("  svg files written           : " + written);
-  console.log("  output folders              : assets/albums, assets/artists, assets/playlists, assets/images");
+  console.log("  output folders              : assets/playlists, assets/images");
 }
 
 run();

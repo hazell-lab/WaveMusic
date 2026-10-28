@@ -24,7 +24,7 @@ const state = {
   shuffleOrder: []
 };
 
-const STORAGE_KEY = "wavemusic.state.v1";
+const STORAGE_KEY = "wavemusic.state.v2"; // v2: real songs, so older saved likes no longer match
 
 // change these to use your own name and avatar
 const USER = {
@@ -199,10 +199,16 @@ function stopDemoTimer() {
   demoTimer = null;
 }
 
+// the badge under the song title says "Preview" for the 30-second apple
+// music clips, or "Demo" when a clip could not load and the timer is used
 function setDemoMode(on) {
   state.demoMode = !!on;
   const badge = document.getElementById("demo-badge");
-  if (badge) badge.classList.toggle("is-hidden", !state.demoMode);
+  if (!badge) return;
+  const label = badge.querySelector(".demo-badge-label");
+  if (label) label.textContent = state.demoMode ? "Demo" : "Preview";
+  badge.title = state.demoMode ? "Could not load the preview, so a timer is used instead" : "30-second preview from Apple Music";
+  badge.classList.toggle("is-hidden", !currentSong());
 }
 
 // song length from the audio file, or from the "3:42" text in data.js
@@ -246,6 +252,27 @@ function loadCurrentTrack(autoplay) {
   const song = currentSong();
   if (!song) return;
 
+  // previews are still being fetched from apple music: try again when ready
+  if (!song.audio && APPLE.status === "loading") {
+    updatePlayerMeta();
+    whenAppleReady(function () {
+      if (currentSong() === song) loadCurrentTrack(autoplay);
+    });
+    return;
+  }
+
+  // no preview at all (offline or the api failed): use the demo timer
+  if (!song.audio) {
+    audio.removeAttribute("src");
+    state.demoSeconds = 0;
+    updatePlayerMeta();
+    updatePlayerProgress();
+    renderQueueIfOpen();
+    syncTrackRowHighlight();
+    if (autoplay) enterDemoPlayback();
+    return;
+  }
+
   audio.src = song.audio;
   audio.volume = state.muted ? 0 : state.volume;
   state.demoSeconds = 0;
@@ -272,9 +299,14 @@ function loadCurrentTrack(autoplay) {
   }
 }
 
-// keep the player usable when there is no audio file
+// keep the player usable when a preview cannot load (offline, blocked, removed)
+let demoNoticeShown = false;
 function enterDemoPlayback() {
   setDemoMode(true);
+  if (!demoNoticeShown) {
+    demoNoticeShown = true;
+    showToast("Preview could not load. Check your internet connection.", "headphones");
+  }
   state.isPlaying = true;
   syncPlayIcons();
   startDemoTimer();
@@ -490,7 +522,7 @@ function updatePlayerMeta() {
         title: song.title,
         artist: artistName(song),
         album: albumTitle(song),
-        artwork: [{ src: song.cover ? albumCover(song.cover) : "assets/images/default-cover.svg", sizes: "512x512", type: "image/svg+xml" }]
+        artwork: [{ src: song.cover ? albumCover(song.cover) : "assets/images/default-cover.svg", sizes: "600x600" }]
       });
     } catch (err) {
       // media session is optional
@@ -873,7 +905,7 @@ function viewHome() {
     .join("");
 
   const trending = SONGS.slice()
-    .sort(function (a, b) { return Number(String(b.plays).replace(/,/g, "")) - Number(String(a.plays).replace(/,/g, "")); })
+    .sort(function (a, b) { return (a.rank || 999) - (b.rank || 999); })
     .slice(0, 10)
     .map(function (s) { return s.id; });
 
@@ -895,11 +927,11 @@ function viewHome() {
       sectionHead("Popular Albums", "Fresh releases and fan favourites") +
       '<div class="grid-cards">' + albumCards + "</div>" +
 
-      sectionHead("Trending Songs", "The ten most played tracks this week",
+      sectionHead("Trending Songs", "Big songs everyone keeps coming back to",
         '<button class="link-btn" type="button" data-action="shuffle-all">Shuffle all</button>') +
       buildTrackTable(trending, {
         context: "Trending Songs",
-        show: { index: true, cover: true, title: true, artist: true, album: true, plays: true, duration: true, like: true }
+        show: { index: true, cover: true, title: true, artist: true, album: true, plays: false, duration: true, like: true }
       }) +
     "</section>"
   );
@@ -1064,7 +1096,7 @@ function viewLibrary() {
     }).join("") + "</div>";
   } else if (state.libraryTab === "artists") {
     body = '<div class="grid-cards grid-cards--artists">' + ARTISTS.map(function (a) {
-      return mediaCard("artist", a, { subtitle: a.monthly + " monthly listeners" });
+      return mediaCard("artist", a, { subtitle: a.genre });
     }).join("") + "</div>";
   } else {
     body = '<div class="grid-cards">' + ALBUMS.map(function (a) {
@@ -1217,7 +1249,7 @@ function viewAlbum(albumId) {
       }) +
       buildTrackTable(ids, {
         context: album.title,
-        show: { index: true, cover: false, title: true, artist: false, album: false, plays: true, duration: true, like: true }
+        show: { index: true, cover: false, title: true, artist: false, album: false, plays: false, duration: true, like: true }
       }) +
       credits +
       (otherAlbums.length
@@ -1240,7 +1272,7 @@ function viewArtist(artistId) {
 
   const allSongs = songsOfArtist(artistId);
   const popular = allSongs.slice()
-    .sort(function (a, b) { return Number(String(b.plays).replace(/,/g, "")) - Number(String(a.plays).replace(/,/g, "")); })
+    .sort(function (a, b) { return (a.rank || 999) - (b.rank || 999); })
     .slice(0, 6)
     .map(function (s) { return s.id; });
   const allIds = allSongs.map(function (s) { return s.id; });
@@ -1255,7 +1287,9 @@ function viewArtist(artistId) {
   const singleCards = singles.map(function (s) {
     return (
       '<article class="card" data-gradient="' + s.slug + '" ' + gradientStyle(s.slug) + ">" +
-        '<div class="card-art" data-action="open" data-type="album" data-id="' + (getSong(s.song).album || s.slug) + '">' +
+        (getSong(s.song).album
+          ? '<div class="card-art" data-action="open" data-type="album" data-id="' + getSong(s.song).album + '">'
+          : '<div class="card-art" data-action="play-song" data-id="' + s.song + '" data-label="' + escapeAttr(s.title) + '">') +
           coverArt({ src: albumCover(s.slug), name: s.slug, alt: s.title, className: "card-cover" }) +
           playPill([s.song], s.title, "card-play") +
         "</div>" +
@@ -1268,7 +1302,7 @@ function viewArtist(artistId) {
   }).join("");
 
   const similar = similarArtists(artistId, 6).map(function (a) {
-    return mediaCard("artist", a, { subtitle: a.monthly + " monthly listeners" });
+    return mediaCard("artist", a, { subtitle: a.genre });
   }).join("");
 
   return (
@@ -1278,9 +1312,9 @@ function viewArtist(artistId) {
           "onerror=\"onCoverError(this,'" + escapeAttr(artist.name) + "')\">" +
         '<div class="artist-hero-scrim" aria-hidden="true"></div>' +
         '<div class="artist-hero-content">' +
-          '<p class="detail-kicker">' + chip("Verified artist", "accent") + "</p>" +
+          '<p class="detail-kicker">' + chip("Artist", "accent") + "</p>" +
           '<h1 class="artist-name">' + artist.name + (artist.verified ? '<span class="verified-badge" title="Verified artist">' + icon("verified") + "</span>" : "") + "</h1>" +
-          '<p class="artist-listeners"><strong>' + artist.monthly + "</strong> monthly listeners</p>" +
+          '<p class="artist-listeners"><strong>' + artist.genre + "</strong> &middot; " + allSongs.length + " song" + (allSongs.length === 1 ? "" : "s") + " on WaveMusic</p>" +
           '<div class="detail-actions">' +
             playPill(allIds.length ? allIds : popular, artist.name, "btn-solid") +
             '<button class="btn-ghost follow-btn" type="button" data-action="follow" data-id="' + artist.id + '">Follow</button>' +
@@ -1289,11 +1323,11 @@ function viewArtist(artistId) {
         "</div>" +
       "</header>" +
 
-      sectionHead("Popular Songs", artist.name + "'s most played tracks",
+      sectionHead("Popular Songs", "Top tracks by " + artist.name,
         '<button class="link-btn" type="button" data-action="play-collection" data-ids="' + allIds.join(",") + '" data-label="' + escapeAttr(artist.name) + '">Play all</button>') +
       buildTrackTable(popular, {
         context: artist.name,
-        show: { index: true, cover: true, title: true, artist: false, album: true, plays: true, duration: true, like: true }
+        show: { index: true, cover: true, title: true, artist: false, album: true, plays: false, duration: true, like: true }
       }) +
 
       (albums.length ? sectionHead("Albums") + '<div class="grid-cards">' + albumCards + "</div>" : "") +
@@ -1304,8 +1338,9 @@ function viewArtist(artistId) {
 
       '<section class="bio-block">' +
         sectionHead("About " + artist.name) +
-        "<p>" + artist.name + " is a fictional " + artist.genre + " artist created for this WaveMusic demo. " +
-        "No real recordings, artwork or trademarks are used anywhere in this project.</p>" +
+        "<p>" + artist.name + " &middot; " + artist.genre + ". The 30-second song previews and album artwork on this page " +
+        "are streamed from Apple Music through the public iTunes Search API.</p>" +
+        (artist.url ? '<p><a class="link-btn" href="' + escapeAttr(artist.url) + '" target="_blank" rel="noopener">Listen on Apple Music</a></p>' : "") +
       "</section>" +
     "</section>"
   );
@@ -1793,7 +1828,7 @@ function init() {
   applyVolume();
   syncToggleIcons();
   syncPlayIcons();
-  setDemoMode(true);
+  setDemoMode(false);
 
   setText("user-name", USER.name);
   const avatar = document.getElementById("user-avatar");
@@ -1809,6 +1844,13 @@ function init() {
   renderView();
   updateNavActive();
   updateHistoryButtons();
+
+  // fetch the apple music previews and artwork, then redraw with real covers
+  loadAppleCatalogue(function () {
+    const typing = document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+    if (!typing) renderView();
+    if (currentSong()) updatePlayerMeta();
+  });
 
   wireAudioEvents();
   wireProgressBar("player-progress");
@@ -1839,12 +1881,6 @@ function init() {
     if (window.innerWidth > 900) closeSidebar();
   });
 
-  // remind the user that demo mode means no audio files yet
-  window.setTimeout(function () {
-    if (state.demoMode) {
-      showToast("Demo mode: add mp3 files in assets/audio to hear real sound", "headphones");
-    }
-  }, 1600);
 }
 
 document.addEventListener("DOMContentLoaded", init);
