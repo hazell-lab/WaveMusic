@@ -599,7 +599,8 @@ try {
     /Popular Albums/.test(homeHtml) && /Trending Songs/.test(homeHtml));
   check("home track table has rows", view.querySelectorAll(".track-row").length >= 10,
     view.querySelectorAll(".track-row").length + " rows");
-  check("cover art points at local svg files", view.querySelectorAll("img")[0].getAttribute("src").indexOf("assets/albums/") === 0,
+  check("covers fall back to the default art before apple loads",
+    view.querySelectorAll("img")[0].getAttribute("src") === "assets/images/default-cover.svg",
     view.querySelectorAll("img")[0].getAttribute("src"));
 
   // every page renders
@@ -610,8 +611,8 @@ try {
     ["recent", "recently played"],
     ["playlist/chill-vibes", "playlist"],
     ["playlist/daily-mix-01", "mix playlist"],
-    ["album/neon-skies", "album"],
-    ["artist/nova-lane", "artist"],
+    ["album/after-hours", "album"],
+    ["artist/the-weeknd", "artist"],
     ["category/jazz", "category"],
     ["album/does-not-exist", "missing album"]
   ].forEach(([route, label]) => {
@@ -629,19 +630,19 @@ try {
 
   // search
   run('navigate("search", { skipHistory: true });');
-  run('handleSearchInput("midnight", "page"); renderView();');
+  run('handleSearchInput("love", "page"); renderView();');
   const hits = view.querySelectorAll(".track-row").length;
   const titles = view.querySelectorAll(".row-text strong").map((n) => n.textContent).join(" | ");
-  check("searching midnight filters the songs", hits >= 2 && /Midnight/i.test(titles), hits + " hits: " + titles);
-  run('handleSearchInput("nova", "page"); renderView();');
-  check("searching an artist name works", /Nova Lane/.test(view.innerHTML));
+  check("searching love filters the songs", hits >= 2 && /love/i.test(titles), hits + " hits: " + titles);
+  run('handleSearchInput("weeknd", "page"); renderView();');
+  check("searching an artist name works", /The Weeknd/.test(view.innerHTML));
   run('handleSearchInput("zzzz-nothing", "page"); renderView();');
   check("no results shows the empty state", view.querySelectorAll(".empty-state").length === 1);
   run('handleSearchInput("", "page"); renderView();');
-  check("clearing the search shows the categories", view.querySelectorAll(".category-card").length === 12,
+  check("clearing the search shows the categories", view.querySelectorAll(".category-card").length === run("CATEGORIES.length"),
     view.querySelectorAll(".category-card").length + " categories");
   // no manual renderView() here: typing in the page box must redraw by itself
-  run('handleSearchInput("midnight", "page");');
+  run('handleSearchInput("love", "page");');
   check("search page box updates results by itself", view.querySelectorAll(".track-row").length >= 2);
   run('handleSearchInput("<b>x", "page");');
   check("search text is escaped, not run as html", view.innerHTML.indexOf("<b>x") === -1 && view.innerHTML.indexOf("&lt;b&gt;x") !== -1);
@@ -663,29 +664,29 @@ try {
   // playlist page and playback
   run('navigate("playlist/chill-vibes", { skipHistory: true });');
   const meta = view.querySelector(".detail-meta").textContent;
-  check("playlist shows the count and the length", /24 songs/.test(meta) && /hr|min/.test(meta), meta.trim());
+  check("playlist shows the count and the length", /16 songs/.test(meta) && /hr|min/.test(meta), meta.trim());
   check("playlist table has the right columns", /Date Added/.test(view.innerHTML) && /Album/.test(view.innerHTML));
 
   view.querySelector('[data-action="play-collection"]').click();
-  check("play fills a queue of 24", run("state.queue.length") === 24, run("state.queue.length") + " queued");
-  check("player shows the title", textOf("player-title") === "Midnight Drive", textOf("player-title"));
-  check("player shows the artist", textOf("player-artist") === "Nova Lane", textOf("player-artist"));
-  check("demo mode is on without mp3 files", run("state.demoMode") === true);
+  check("play fills a queue of 16", run("state.queue.length") === 16, run("state.queue.length") + " queued");
+  check("player shows the title", textOf("player-title") === "BIRDS OF A FEATHER", textOf("player-title"));
+  check("player shows the artist", textOf("player-artist") === "Billie Eilish", textOf("player-artist"));
+  check("demo mode is on when previews cannot load", run("state.demoMode") === true);
   check("demo badge is visible", !document.getElementById("demo-badge").classList.contains("is-hidden"));
   check("one row is highlighted", view.querySelectorAll(".track-row.is-active").length === 1,
     view.querySelectorAll(".track-row.is-active").length + " active");
 
   // next and previous
   document.querySelector('[data-action="next"]').click();
-  check("next moves to the next song", textOf("player-title") === "Blue Horizon", textOf("player-title"));
+  check("next moves to the next song", textOf("player-title") === "Don't Know Why", textOf("player-title"));
   document.querySelector('[data-action="prev"]').click();
   document.querySelector('[data-action="prev"]').click();
-  check("previous goes back", textOf("player-title") === "Midnight Drive", textOf("player-title"));
+  check("previous goes back", textOf("player-title") === "BIRDS OF A FEATHER", textOf("player-title"));
 
   // shuffle
   run('toggleShuffle();');
   check("shuffle turns on", run("state.shuffle") === true && document.getElementById("shuffle-btn").classList.contains("is-active"));
-  check("shuffle order covers every song", run("state.shuffleOrder.length") === 24);
+  check("shuffle order covers every song", run("state.shuffleOrder.length") === 16);
   check("shuffle keeps the current song first", run("state.shuffleOrder[0]") === run("state.queueIndex"));
   const beforeShuffle = run("state.queueIndex");
   document.querySelector('[data-action="next"]').click();
@@ -744,7 +745,7 @@ try {
   view.querySelector('[data-action="play-collection"]').click();
   document.getElementById("queue-btn").click();
   check("queue panel opens with every track", document.getElementById("queue-panel").classList.contains("is-open") &&
-    document.getElementById("queue-list").querySelectorAll(".queue-item").length === 24,
+    document.getElementById("queue-list").querySelectorAll(".queue-item").length === 16,
     document.getElementById("queue-list").querySelectorAll(".queue-item").length + " items");
   document.getElementById("queue-list").querySelectorAll(".queue-item")[3].click();
   check("clicking a queue row plays that song", run("state.queueIndex") === 3);
@@ -792,35 +793,40 @@ try {
   check("totalDurationText", /hr/.test(run("totalDurationText(PLAYLISTS[0].tracks)")), run("totalDurationText(PLAYLISTS[0].tracks)"));
   check("song ids are unique", run("new Set(SONGS.map(s => s.id)).size === SONGS.length"));
   check("every song has an artist", run("SONGS.every(s => !!getArtist(s.artist))"));
-  check("every song has cover, audio and duration", run("SONGS.every(s => s.cover && s.audio && s.duration)"));
+  check("every song has a cover, an apple id and a duration", run("SONGS.every(s => s.cover && s.appleId && s.duration)"));
   check("every album track exists", run("ALBUMS.every(a => a.tracks.every(id => !!getSong(id)))"));
   check("every playlist track exists", run("PLAYLISTS.every(p => p.tracks.every(id => !!getSong(id)))"));
   check("every mix track exists", run("MIXES.every(m => m.tracks.every(id => !!getSong(id)))"));
   check("every album has an artist", run("ALBUMS.every(a => !!getArtist(a.artist))"));
-  check("audio paths follow the song id", run('SONGS.every(s => s.audio === "assets/audio/" + s.id + ".mp3")'));
+  check("apple track ids are unique", run("new Set(SONGS.map(s => s.appleId)).size === SONGS.length"));
   check("every category has songs", run("CATEGORIES.every(c => SONGS.some(s => s.genre === c.genre))"),
     run("CATEGORIES.filter(c => !SONGS.some(s => s.genre === c.genre)).map(c => c.title).join(', ')") || "all covered");
   check("every album has a palette", run('ALBUMS.every(a => PALETTES[a.slug.replace(/-([a-z0-9])/g, (m,c) => c.toUpperCase())])'));
 
-  // the artwork files exist
+  // the generated artwork files exist (album and artist art comes from apple)
   const missing = [];
-  run("ALBUMS").forEach((a) => {
-    if (!fs.existsSync(path.join(ROOT, "assets/albums", a.slug, "cover.svg"))) missing.push("album " + a.slug);
-  });
-  run("ARTISTS").forEach((a) => {
-    if (!fs.existsSync(path.join(ROOT, "assets/artists", a.id, "cover.svg"))) missing.push("artist " + a.id);
-    if (!fs.existsSync(path.join(ROOT, "assets/artists", a.id, "hero.svg"))) missing.push("hero " + a.id);
-  });
   run("PLAYLISTS.concat(MIXES)").forEach((p) => {
     if (!fs.existsSync(path.join(ROOT, "assets/playlists", p.slug, "cover.svg"))) missing.push("playlist " + p.slug);
-  });
-  run("SINGLES").forEach((s) => {
-    if (!fs.existsSync(path.join(ROOT, "assets/albums", s.slug, "cover.svg"))) missing.push("single " + s.slug);
   });
   ["avatar.svg", "default-cover.svg", "app-icon.svg"].forEach((f) => {
     if (!fs.existsSync(path.join(ROOT, "assets/images", f))) missing.push("image " + f);
   });
-  check("every artwork file exists on disk", missing.length === 0, missing.join(", ") || "58 files verified");
+  check("every artwork file exists on disk", missing.length === 0, missing.join(", ") || "18 files verified");
+
+  // apple music data is copied onto songs, albums and artists
+  run('applyAppleData([{ trackId: 1499378607, previewUrl: "https://example.test/p.m4a", ' +
+      'artworkUrl100: "https://example.test/art/100x100bb.jpg", trackViewUrl: "https://example.test/t", ' +
+      'artistViewUrl: "https://example.test/a" }]);');
+  check("apple preview becomes the song audio", run("getSong(1).audio") === "https://example.test/p.m4a");
+  check("apple artwork is used at 600px for the album", run('albumCover("after-hours")') === "https://example.test/art/600x600bb.jpg",
+    run('albumCover("after-hours")'));
+  check("artist banner uses the bigger artwork", run('artistHero("the-weeknd")') === "https://example.test/art/1200x1200bb.jpg");
+  check("artist gets an apple music link", run('getArtist("the-weeknd").url') === "https://example.test/a");
+  check("singles open their song, not a missing album page", (function () {
+    run('navigate("artist/sabrina-carpenter", { skipHistory: true });');
+    const art = view.querySelector('.card-art[data-action="play-song"]');
+    return !!art && art.dataset.id === "58";
+  })());
 } catch (err) {
   check("the harness ran without throwing", false, err.stack.split("\n").slice(0, 8).join("\n        "));
 }
