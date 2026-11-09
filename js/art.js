@@ -39,9 +39,25 @@ function coverArt(options) {
   );
 }
 
-// if an image is missing, swap in a generated placeholder
+// if an image fails, retry remote artwork a couple of times (the apple cdn
+// sometimes drops connections when many covers load at once), then swap in
+// a generated placeholder
+const COVER_RETRIES = 2;
 function onCoverError(img, text) {
   if (!img || img.dataset.fallbackApplied === "1") return;
+  const tries = Number(img.dataset.retries || 0);
+  const src = img.getAttribute("src") || "";
+  if (/^https?:/.test(src) && tries < COVER_RETRIES) {
+    img.dataset.retries = String(tries + 1);
+    setTimeout(function () {
+      // the card may have been re-rendered or changed meanwhile
+      if (img.isConnected && img.getAttribute("src") === src) {
+        img.removeAttribute("src");
+        img.setAttribute("src", src);
+      }
+    }, 800 * (tries + 1) + Math.random() * 400);
+    return;
+  }
   img.dataset.fallbackApplied = "1";
   img.src = placeholderDataUri(text || "WaveMusic");
 }
