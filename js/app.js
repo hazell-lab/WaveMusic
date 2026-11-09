@@ -337,7 +337,10 @@ function resumePlayback() {
   const song = currentSong();
   if (!song) return;
   if (state.demoMode) {
-    enterDemoPlayback();
+    // the preview failed before; try the real audio again (the connection
+    // may be back) and only fall back to the timer if it fails again
+    if (song.audio) loadCurrentTrack(true);
+    else enterDemoPlayback();
     return;
   }
   const attempt = audio.play();
@@ -1846,10 +1849,16 @@ function init() {
   updateHistoryButtons();
 
   // fetch the apple music previews and artwork, then redraw with real covers
-  loadAppleCatalogue(function () {
+  function onAppleUpdate() {
     const typing = document.activeElement && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
     if (!typing) renderView();
     if (currentSong()) updatePlayerMeta();
+  }
+  loadAppleCatalogue(onAppleUpdate);
+
+  // if the first lookup failed (offline), try again once the connection is back
+  window.addEventListener("online", function () {
+    if (APPLE.status === "failed") loadAppleCatalogue(onAppleUpdate);
   });
 
   wireAudioEvents();
