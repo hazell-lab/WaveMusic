@@ -2,337 +2,197 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="WaveMusic - a dark-themed music streaming web app built with HTML, CSS and vanilla JavaScript. Plays 30-second previews of popular songs from the iTunes Search API, with playlists, albums, artist pages, search and a responsive mobile layout.">
-  <meta name="theme-color" content="#08080a">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="WaveMusic is a listening room for the web: browse a curated catalogue, build playlists and play 30-second Apple Music previews.">
+  <meta name="theme-color" content="#0c0b0a">
   <meta name="color-scheme" content="dark">
+  <title>WaveMusic</title>
 
-  <title>WaveMusic &mdash; Listen Without Limits</title>
-
-  <!-- app icon -->
   <link rel="icon" type="image/svg+xml" href="assets/images/app-icon.svg">
   <link rel="apple-touch-icon" href="assets/images/app-icon.svg">
 
-  <!-- fonts: the project uses system fonts, so nothing to download.
-       uncomment the two lines below if you want the inter webfont
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
-  -->
-
-  <!-- open connections early to the apple servers that serve previews and artwork -->
-  <link rel="preconnect" href="https://itunes.apple.com">
+  <!-- previews and artwork are served by apple -->
+  <link rel="preconnect" href="https://itunes.apple.com" crossorigin>
   <link rel="preconnect" href="https://is1-ssl.mzstatic.com">
   <link rel="dns-prefetch" href="https://audio-ssl.itunes.apple.com">
 
-  <!-- styles -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/player.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="modulepreload" href="js/main.js">
 </head>
 
 <body>
+  <a class="skip-link" href="#view" data-action="skip">Skip to content</a>
 
-  <!-- app shell: sidebar, top header, main view and the player -->
-  <a class="skip-link" href="#view">Skip to main content</a>
-
-  <div class="app">
-
-    <!-- sidebar -->
-    <aside class="sidebar" id="sidebar" aria-label="Main navigation">
-      <div class="brand">
-        <a class="brand-link" href="./" data-action="go" data-view="home" aria-label="WaveMusic home">
-          <span class="brand-mark"><i data-icon="wave"></i></span>
-          <span class="brand-text">
-            <span class="brand-name">WaveMusic</span>
-            <span class="brand-tag">Listen freely</span>
-          </span>
+  <div class="app" id="app">
+    <div class="shell" id="shell">
+      <header class="masthead">
+        <a class="wordmark" href="#home" aria-label="WaveMusic, listen">
+          <svg class="wordmark-mark" viewBox="0 0 32 32" aria-hidden="true">
+            <circle cx="16" cy="16" r="15" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="16" cy="16" r="9.5" fill="none" stroke="currentColor" stroke-width="1" opacity=".55"/>
+            <circle cx="16" cy="16" r="3" fill="currentColor"/>
+          </svg>
+          <span class="wordmark-text">Wave<em>Music</em></span>
         </a>
-        <button class="icon-btn sidebar-close" type="button" data-action="close-sidebar" aria-label="Close navigation">
-          <i data-icon="close"></i>
+
+        <nav class="primary-nav" aria-label="Primary">
+          <a href="#home" data-nav="home">Listen</a>
+          <a href="#search" data-nav="search">Browse</a>
+          <a href="#library" data-nav="library">Library</a>
+        </nav>
+
+        <form class="masthead-search" role="search" data-action="submit-search">
+          <label class="sr-only" for="top-search">Search the catalogue</label>
+          <svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg>
+          <input id="top-search" type="search" placeholder="Search songs, artists, albums" autocomplete="off" spellcheck="false">
+          <kbd aria-hidden="true">/</kbd>
+        </form>
+
+        <a class="icon-btn masthead-search-link" href="#search" aria-label="Search">
+          <svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg>
+        </a>
+        <button class="icon-btn masthead-help" type="button" data-action="shortcuts" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+          <svg class="ico" aria-hidden="true"><use href="#i-keyboard"></use></svg>
         </button>
-      </div>
-
-      <!-- main links -->
-      <nav class="side-nav">
-        <button class="side-link" type="button" data-nav="home" data-action="go" data-view="home">
-          <i data-icon="home"></i><span>Home</span>
-        </button>
-        <button class="side-link" type="button" data-nav="search" data-action="go" data-view="search">
-          <i data-icon="search"></i><span>Search</span>
-        </button>
-        <button class="side-link" type="button" data-nav="library" data-action="go" data-view="library">
-          <i data-icon="library"></i><span>Library</span>
-        </button>
-        <button class="side-link" type="button" data-nav="liked" data-action="go" data-view="liked">
-          <i data-icon="heart"></i><span>Liked Songs</span>
-          <span class="side-badge" id="liked-count">12</span>
-        </button>
-        <button class="side-link" type="button" data-nav="recent" data-action="go" data-view="recent">
-          <i data-icon="history"></i><span>Recently Played</span>
-        </button>
-      </nav>
-
-      <!-- your playlists: filled in by app.js -->
-      <section class="side-playlists">
-        <h2 class="side-heading">Your Playlists</h2>
-        <div class="side-playlist-list" id="sidebar-playlists"></div>
-      </section>
-
-      <p class="sidebar-foot">
-        Song previews and artwork courtesy of Apple Music.
-      </p>
-    </aside>
-
-    <!-- backdrop behind the mobile drawer -->
-    <div class="sidebar-backdrop" data-action="close-sidebar" aria-hidden="true"></div>
-
-    <!-- main column -->
-    <div class="main" id="main">
-
-      <!-- top header -->
-      <header class="topbar">
-        <button class="icon-btn menu-btn" type="button" data-action="toggle-sidebar" aria-label="Open navigation">
-          <i data-icon="menu"></i>
-        </button>
-
-        <div class="nav-group">
-          <button class="icon-btn" type="button" id="back-btn" data-action="back" aria-label="Go back" title="Go back" disabled>
-            <i data-icon="chevronLeft"></i>
-          </button>
-          <button class="icon-btn" type="button" id="forward-btn" data-action="forward" aria-label="Go forward" title="Go forward" disabled>
-            <i data-icon="chevronRight"></i>
-          </button>
-        </div>
-
-        <!-- clicking anywhere here opens the search page -->
-        <div class="search-field" data-action="go" data-view="search" role="search">
-          <i data-icon="search"></i>
-          <input id="top-search" type="search" placeholder="Search songs, artists, albums..."
-                 autocomplete="off" aria-label="Search songs, artists, albums">
-        </div>
-
-        <div class="topbar-spacer"></div>
-
-        <button class="icon-btn" type="button" data-action="toast" data-message="You have no new notifications" aria-label="Notifications">
-          <i data-icon="bell"></i>
-        </button>
-
-        <!-- profile menu -->
-        <div class="profile">
-          <button class="profile-btn" type="button" id="profile-btn" data-action="open-profile"
-                  aria-haspopup="true" aria-expanded="false" aria-controls="profile-menu">
-            <img class="avatar" id="user-avatar" src="assets/images/avatar.svg" alt="Profile picture"
-                 onerror="onCoverError(this,'Hazim Aqil')">
-            <span class="profile-name" id="user-name">Hazim Aqil</span>
-            <span class="profile-caret"><i data-icon="chevronDown"></i></span>
-          </button>
-
-          <div class="dropdown is-hidden" id="profile-menu" role="menu" aria-hidden="true">
-            <div class="dropdown-head">
-              <img class="avatar" src="assets/images/avatar.svg" alt="" onerror="onCoverError(this,'Hazim Aqil')">
-              <div>
-                <strong>Hazim Aqil</strong>
-                <small>@hazell-lab &middot; Free plan (demo)</small>
-              </div>
-            </div>
-            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
-                    data-icon="user" data-message="Profile page is not part of this demo">
-              <i data-icon="user"></i><span>Profile</span>
-            </button>
-            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
-                    data-icon="settings" data-message="Settings panel is not part of this demo">
-              <i data-icon="settings"></i><span>Settings</span>
-            </button>
-            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
-                    data-icon="plus" data-message="Upgrade flow is not part of this demo">
-              <i data-icon="plus"></i><span>Upgrade plan</span>
-            </button>
-            <div class="dropdown-sep"></div>
-            <button class="dropdown-item" type="button" role="menuitem" data-action="profile-item"
-                    data-icon="logout" data-message="Logged out (frontend demo only)">
-              <i data-icon="logout"></i><span>Log out</span>
-            </button>
-          </div>
-        </div>
       </header>
 
-      <!-- pages are rendered in here by app.js -->
+      <div class="banner" id="catalogue-banner" role="status" hidden></div>
+
       <main class="view" id="view" tabindex="-1"></main>
-    </div>
-  </div>
 
-  <!-- queue panel -->
-  <aside class="queue-panel" id="queue-panel" aria-label="Playback queue" aria-hidden="true">
-    <div class="queue-head">
-      <h2>Queue</h2>
-      <button class="icon-btn" type="button" data-action="toggle-queue" aria-label="Close queue">
-        <i data-icon="close"></i>
-      </button>
-    </div>
-    <p class="queue-source" id="queue-source">Playing from: WaveMusic</p>
-    <div class="queue-list" id="queue-list"></div>
-  </aside>
-
-  <!-- music player -->
-  <footer class="player" id="player" aria-label="Music player">
-
-    <!-- current song -->
-    <div class="player-left">
-      <button class="player-cover-btn" type="button" id="player-cover-btn"
-              data-action="open-now-playing" title="Open the full player">
-        <img class="player-cover" id="player-cover" src="assets/images/default-cover.svg" alt="Album artwork"
-             onerror="onCoverError(this,'WaveMusic')">
-      </button>
-      <div class="player-meta">
-        <button class="player-title" id="player-title" type="button" data-action="open-now-playing">Nothing playing yet</button>
-        <span class="player-artist" id="player-artist">Pick a song to begin</span>
-        <span class="demo-badge is-hidden" id="demo-badge"><i data-icon="headphones"></i> <span class="demo-badge-label">Preview</span></span>
-      </div>
-      <span id="player-like"></span>
+      <footer class="colophon">
+        <p>WaveMusic plays 30-second previews and shows artwork supplied by Apple Music through the public iTunes Search API. Songs and artwork belong to their rights holders.</p>
+      </footer>
     </div>
 
-    <!-- playback controls -->
-    <div class="player-center">
-      <div class="player-controls">
-        <button class="ctrl-btn" type="button" id="shuffle-btn" data-action="shuffle" title="Shuffle" aria-label="Shuffle">
-          <i data-icon="shuffle"></i>
+    <!-- the player: a column on wide screens, a full-screen sheet on small ones -->
+    <aside class="deck" id="deck" aria-labelledby="deck-heading" data-status="idle">
+      <div class="deck-head">
+        <button class="icon-btn deck-close" type="button" data-action="close-deck" aria-label="Close player">
+          <svg class="ico" aria-hidden="true"><use href="#i-chevronDown"></use></svg>
         </button>
-        <button class="ctrl-btn" type="button" data-action="prev" title="Previous" aria-label="Previous track">
-          <i data-icon="skipBack"></i>
-        </button>
-        <button class="play-btn" type="button" data-action="toggle-play" id="player-play" title="Play" aria-label="Play">
-          <span id="player-play-icon"><i data-icon="play"></i></span>
-        </button>
-        <button class="ctrl-btn" type="button" data-action="next" title="Next" aria-label="Next track">
-          <i data-icon="skipForward"></i>
-        </button>
-        <button class="ctrl-btn" type="button" id="repeat-btn" data-action="repeat" title="Repeat off" aria-label="Repeat">
-          <i data-icon="repeat"></i>
-        </button>
+        <h2 class="kicker" id="deck-heading">Now playing</h2>
+        <p class="deck-status" id="deck-status"><span class="led" aria-hidden="true"></span><span class="deck-status-text">Idle</span></p>
       </div>
 
-      <div class="player-progress-row">
-        <span class="time" id="player-current">0:00</span>
-        <div class="progress" id="player-progress" role="slider" tabindex="0"
-             aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="progress-track">
-            <div class="progress-fill" id="player-progress-fill"></div>
-            <div class="progress-knob" id="player-progress-knob"></div>
-          </div>
-        </div>
-        <span class="time" id="player-duration">0:00</span>
-      </div>
-    </div>
+      <div class="deck-body">
+        <div class="deck-now">
+          <figure class="deck-art" id="deck-art-frame">
+            <img id="deck-art" src="assets/images/default-cover.svg" alt="" width="600" height="600" decoding="async">
+          </figure>
 
-    <!-- queue, devices and volume -->
-    <div class="player-right">
-      <button class="icon-btn" type="button" id="queue-btn" data-action="toggle-queue" title="Queue" aria-label="Show queue">
-        <i data-icon="queue"></i>
-      </button>
-      <button class="icon-btn device-btn" type="button" data-action="toast"
-              data-message="No other devices found (demo)" title="Connect to a device" aria-label="Connect to a device">
-        <i data-icon="devices"></i>
-      </button>
-      <button class="icon-btn" type="button" id="volume-btn" data-action="toggle-mute" title="Mute" aria-label="Mute">
-        <i data-icon="volume"></i>
-      </button>
-      <div class="volume-wrap">
-        <input class="volume-slider" id="volume-slider" type="range" min="0" max="100" value="80"
-               aria-label="Volume" style="--volume: 80%">
-      </div>
-    </div>
-  </footer>
-
-  <!-- now playing overlay -->
-  <div class="now-playing" id="now-playing" role="dialog" aria-modal="true" aria-label="Now playing" aria-hidden="true">
-    <div class="np-inner">
-      <button class="icon-btn np-close" type="button" data-action="close-now-playing" aria-label="Close full player">
-        <i data-icon="chevronDown"></i>
-      </button>
-
-      <div class="np-grid">
-        <figure class="art np-art" id="np-art">
-          <img class="art-img" id="np-cover" src="assets/images/default-cover.svg" alt="Album artwork"
-               onerror="onCoverError(this,'WaveMusic')">
-          <span class="art-sheen" aria-hidden="true"></span>
-        </figure>
-
-        <div class="np-right">
-          <p class="np-kicker">Now playing</p>
-          <h2 class="np-title" id="np-title">Nothing playing yet</h2>
-          <p class="np-artist" id="np-artist">Choose a song from the library</p>
-          <p class="np-album" id="np-album">&mdash;</p>
-
-          <div class="np-progress-row">
-            <span class="time" id="np-current">0:00</span>
-            <div class="progress" id="np-progress" role="slider" tabindex="0"
-                 aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-              <div class="progress-track">
-                <div class="progress-fill" id="np-progress-fill"></div>
-                <div class="progress-knob" id="np-progress-knob"></div>
-              </div>
+          <div class="deck-meta">
+            <h3 class="deck-title" id="deck-title">Nothing playing</h3>
+            <p class="deck-sub" id="deck-sub">Pick a track, or start the chart.</p>
+            <div class="deck-tools" id="deck-tools" hidden>
+              <button class="icon-btn like-btn" type="button" id="deck-like" data-action="like" aria-pressed="false" aria-label="Like">
+                <svg class="ico" aria-hidden="true"><use href="#i-heart"></use></svg>
+              </button>
+              <button class="icon-btn" type="button" data-action="deck-add-to-playlist" aria-label="Add to playlist" title="Add to playlist">
+                <svg class="ico" aria-hidden="true"><use href="#i-listPlus"></use></svg>
+              </button>
+              <button class="icon-btn" type="button" data-action="deck-menu" aria-label="More options for this track" aria-haspopup="menu" title="More">
+                <svg class="ico" aria-hidden="true"><use href="#i-more"></use></svg>
+              </button>
             </div>
-            <span class="time" id="np-duration">0:00</span>
           </div>
 
-          <div class="np-controls">
-            <button class="ctrl-btn" type="button" id="np-shuffle" data-action="shuffle" title="Shuffle" aria-label="Shuffle">
-              <i data-icon="shuffle"></i>
+          <p class="deck-error" id="deck-error" hidden></p>
+
+          <div class="seek" id="seek">
+            <input class="range seek-range" id="seek-range" type="range" min="0" max="1000" step="1" value="0" aria-label="Seek" aria-valuetext="0:00 of 0:00" disabled>
+            <div class="seek-times">
+              <span class="time" id="time-current">0:00</span>
+              <span class="seek-note">30s preview</span>
+              <span class="time" id="time-total">0:00</span>
+            </div>
+          </div>
+
+          <div class="transport" role="group" aria-label="Playback controls">
+            <button class="ctl ctl-toggle" type="button" id="shuffle-btn" data-action="shuffle" aria-pressed="false" aria-label="Shuffle" title="Shuffle (S)">
+              <svg class="ico" aria-hidden="true"><use href="#i-shuffle"></use></svg>
             </button>
-            <button class="ctrl-btn" type="button" data-action="prev" title="Previous" aria-label="Previous track">
-              <i data-icon="skipBack"></i>
+            <button class="ctl" type="button" data-action="prev" aria-label="Previous track" title="Previous (Shift + Left)">
+              <svg class="ico" aria-hidden="true"><use href="#i-skipBack"></use></svg>
             </button>
-            <button class="play-btn" type="button" data-action="toggle-play" title="Play" aria-label="Play">
-              <span id="np-play-icon"><i data-icon="play"></i></span>
+            <button class="ctl ctl-play" type="button" data-action="toggle-play" data-play-button aria-label="Play" title="Play (Space)">
+              <svg class="ico ico-play" aria-hidden="true"><use href="#i-play"></use></svg>
+              <svg class="ico ico-pause" aria-hidden="true"><use href="#i-pause"></use></svg>
+              <span class="spinner" aria-hidden="true"></span>
             </button>
-            <button class="ctrl-btn" type="button" data-action="next" title="Next" aria-label="Next track">
-              <i data-icon="skipForward"></i>
+            <button class="ctl" type="button" data-action="next" aria-label="Next track" title="Next (Shift + Right)">
+              <svg class="ico" aria-hidden="true"><use href="#i-skipForward"></use></svg>
             </button>
-            <button class="ctrl-btn" type="button" id="np-repeat" data-action="repeat" title="Repeat off" aria-label="Repeat">
-              <i data-icon="repeat"></i>
+            <button class="ctl ctl-toggle" type="button" id="repeat-btn" data-action="repeat" aria-pressed="false" aria-label="Repeat: off" title="Repeat (R)">
+              <svg class="ico ico-repeat" aria-hidden="true"><use href="#i-repeat"></use></svg>
+              <svg class="ico ico-repeat-one" aria-hidden="true"><use href="#i-repeatOne"></use></svg>
             </button>
           </div>
 
-          <div class="np-foot">
-            <span id="np-like"></span>
-            <span>Keyboard: <strong>Space</strong> play/pause &middot; <strong>/</strong> search &middot;
-              <strong>Shift + &rarr;</strong> next</span>
+          <div class="volume">
+            <button class="icon-btn" type="button" id="mute-btn" data-action="mute" aria-pressed="false" aria-label="Mute" title="Mute (M)">
+              <svg class="ico" aria-hidden="true"><use href="#i-volume"></use></svg>
+            </button>
+            <input class="range volume-range" id="volume-range" type="range" min="0" max="100" step="1" value="80" aria-label="Volume" aria-valuetext="80%">
+            <output class="time volume-value" id="volume-value" for="volume-range">80</output>
           </div>
         </div>
+
+        <section class="up-next" aria-labelledby="up-next-heading">
+          <div class="up-next-head">
+            <h2 class="kicker" id="up-next-heading">Up next</h2>
+            <span class="up-next-count" id="up-next-count"></span>
+            <button class="text-btn" type="button" data-action="clear-queue" id="clear-queue" hidden>Clear</button>
+          </div>
+          <p class="up-next-source" id="up-next-source"></p>
+          <ol class="queue" id="queue-list"></ol>
+          <p class="queue-empty" id="queue-empty">Nothing queued. Use <strong>Play next</strong> or <strong>Add to queue</strong> from any track's menu.</p>
+        </section>
       </div>
-    </div>
+    </aside>
   </div>
 
-  <!-- mobile navigation -->
-  <nav class="mobile-nav" aria-label="Mobile navigation">
-    <div class="mobile-nav-inner">
-      <a class="mobile-link" href="#home" data-nav-mobile="home" data-action="go" data-view="home">
-        <i data-icon="home"></i><span>Home</span>
-      </a>
-      <a class="mobile-link" href="#search" data-nav-mobile="search" data-action="go" data-view="search">
-        <i data-icon="search"></i><span>Search</span>
-      </a>
-      <a class="mobile-link" href="#library" data-nav-mobile="library" data-action="go" data-view="library">
-        <i data-icon="library"></i><span>Library</span>
-      </a>
-      <a class="mobile-link" href="#liked" data-nav-mobile="liked" data-action="go" data-view="liked">
-        <i data-icon="heart"></i><span>Liked</span>
-      </a>
-      <a class="mobile-link" href="#recent" data-nav-mobile="recent" data-action="go" data-view="recent">
-        <i data-icon="history"></i><span>Recent</span>
-      </a>
-    </div>
+  <!-- compact player for tablets and phones -->
+  <div class="mini" id="mini" data-status="idle">
+    <div class="mini-progress" aria-hidden="true"><span id="mini-progress"></span></div>
+    <button class="mini-open" type="button" data-action="open-deck" id="mini-open" aria-label="Open player">
+      <img class="mini-art" id="mini-art" src="assets/images/default-cover.svg" alt="" width="96" height="96" decoding="async">
+      <span class="mini-text">
+        <span class="mini-title" id="mini-title">Nothing playing</span>
+        <span class="mini-artist" id="mini-artist">Tap play to start the chart</span>
+      </span>
+    </button>
+    <span class="time mini-time" id="mini-time" aria-hidden="true"></span>
+    <button class="ctl mini-prev" type="button" data-action="prev" aria-label="Previous track">
+      <svg class="ico" aria-hidden="true"><use href="#i-skipBack"></use></svg>
+    </button>
+    <button class="ctl ctl-play mini-play" type="button" data-action="toggle-play" data-play-button aria-label="Play">
+      <svg class="ico ico-play" aria-hidden="true"><use href="#i-play"></use></svg>
+      <svg class="ico ico-pause" aria-hidden="true"><use href="#i-pause"></use></svg>
+      <span class="spinner" aria-hidden="true"></span>
+    </button>
+    <button class="ctl mini-next" type="button" data-action="next" aria-label="Next track">
+      <svg class="ico" aria-hidden="true"><use href="#i-skipForward"></use></svg>
+    </button>
+  </div>
+
+  <nav class="tabbar" aria-label="Primary">
+    <a href="#home" data-nav="home"><svg class="ico" aria-hidden="true"><use href="#i-disc"></use></svg><span>Listen</span></a>
+    <a href="#search" data-nav="search"><svg class="ico" aria-hidden="true"><use href="#i-search"></use></svg><span>Browse</span></a>
+    <a href="#library" data-nav="library"><svg class="ico" aria-hidden="true"><use href="#i-library"></use></svg><span>Library</span></a>
   </nav>
 
-  <!-- toast message -->
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="menu" id="menu" role="menu" hidden></div>
+  <dialog class="dialog" id="dialog" aria-labelledby="dialog-title"></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <div class="sr-only" id="announcer" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- the audio element that plays the songs -->
   <audio id="audio" preload="metadata"></audio>
 
-  <!-- scripts: helpers first, then the data, then the app -->
-  <script src="js/icons.js"></script>
-  <script src="js/art.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/app.js"></script>
+  <noscript><p class="noscript">WaveMusic needs JavaScript to play music.</p></noscript>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

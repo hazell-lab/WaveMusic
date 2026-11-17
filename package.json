@@ -1,0 +1,19 @@
+{
+  "name": "wavemusic",
+  "version": "2.0.0",
+  "private": true,
+  "description": "An immersive music listening web app built with vanilla JavaScript modules, playing 30-second Apple Music previews.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/serve.js",
+    "test": "node --test \"tests/*.test.js\"",
+    "build": "node scripts/build.js",
+    "preview": "node scripts/serve.js dist",
+    "art": "node scripts/build-art.js",
+    "zip": "node scripts/zip.js"
+  }
+}
